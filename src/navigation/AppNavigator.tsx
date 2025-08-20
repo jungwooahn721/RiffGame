@@ -20,7 +20,7 @@ const AppNavigator = () => {
       <Stack.Screen
         name="Game"
         component={GameScreen}
-        options={{ title: 'Spielwerk Game' }}
+        options={{ title: 'RiffGame' }}
       />
       <Stack.Screen
         name="UserList"

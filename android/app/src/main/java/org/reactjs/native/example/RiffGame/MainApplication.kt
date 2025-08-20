@@ -1,4 +1,4 @@
-package com.spielwerk
+package org.reactjs.native.example.RiffGame
 
 import android.app.Application
 import com.facebook.react.PackageList
