@@ -57,6 +57,12 @@ const ProfileScreen = ({ navigation, route }: MainTabScreenProps<'Profile'>) => 
     return state.currentUser.following.includes(user.id);
   }, [state.currentUser, user, isOwnProfile]);
 
+  // Calculate total likes on user's games
+  const totalLikes = useMemo(() => {
+    if (!user) return 0;
+    return userGames.reduce((total, game) => total + (game.likes || 0), 0);
+  }, [userGames]);
+
   // Simulate loading state
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -141,47 +147,86 @@ const ProfileScreen = ({ navigation, route }: MainTabScreenProps<'Profile'>) => 
     return num.toString();
   };
 
+  const renderTopHeader = () => (
+    <View style={styles.headerWrapper}>
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <View style={styles.logoContainer}>
+            <Icon name="person-circle" size={20} color="#9d4edd" />
+            <Text style={styles.appName}>RiffGame</Text>
+          </View>
+          <View style={styles.statusIndicator}>
+            <View style={styles.profileDot} />
+            <Text style={styles.profileText}>{isOwnProfile ? 'Your Profile' : 'User Profile'}</Text>
+          </View>
+        </View>
+        {isOwnProfile && (
+          <TouchableOpacity style={styles.settingsButton} onPress={handleSettings}>
+            <Icon name="settings-outline" size={24} color="#ffffff" />
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+
   const renderHeader = () => (
     <>
-      {/* Profile Header with integrated settings */}
+      {/* Profile Header with modern design */}
       <View style={styles.profileHeader}>
-        <View style={styles.avatarContainer}>
-          <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-          {user.verified && (
-            <View style={styles.verifiedBadge}>
-              <Icon name="checkmark" size={12} color="#ffffff" />
-            </View>
-          )}
-        </View>
-        
-        <View style={styles.userInfo}>
-          <View style={styles.nameSection}>
-            <Text style={styles.displayName}>{user.displayName}</Text>
-            {/* Edit Profile and Settings buttons */}
-            {isOwnProfile && (
-              <View style={styles.headerButtons}>
-                <TouchableOpacity style={styles.editProfileButton} onPress={handleEditProfile}>
-                  <Icon name="create-outline" size={20} color="#8e8e93" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.settingsButton} onPress={handleSettings}>
-                  <Icon name="settings-outline" size={20} color="#8e8e93" />
-                </TouchableOpacity>
+        <View style={styles.profileMainInfo}>
+          <View style={styles.avatarContainer}>
+            <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+            {user.verified && (
+              <View style={styles.verifiedBadge}>
+                <Icon name="checkmark" size={12} color="#ffffff" />
               </View>
             )}
           </View>
           
-          <View style={styles.statsContainer}>
-            <TouchableOpacity style={styles.statItem} onPress={handleFollowersPress}>
-              <Text style={styles.statNumber}>{user.followers?.length || '0'}</Text>
+          <View style={styles.userInfo}>
+            <View style={styles.nameSection}>
+              <Text style={styles.displayName}>{user.displayName}</Text>
+              {isOwnProfile && (
+                <TouchableOpacity style={styles.editProfileButton} onPress={handleEditProfile}>
+                  <Icon name="create-outline" size={16} color="#8e8e93" />
+                </TouchableOpacity>
+              )}
+            </View>
+            
+            {user.bio && (
+              <Text style={styles.bio} numberOfLines={2}>{user.bio}</Text>
+            )}
+          </View>
+        </View>
+
+        {/* Stats Container */}
+        <View style={styles.statsContainer}>
+          <TouchableOpacity style={styles.statItem} onPress={handleFollowersPress}>
+            <Text style={styles.statNumber}>{formatNumber(user.followers?.length || 0)}</Text>
+            <View style={styles.statLabelContainer}>
+              <Icon name="people" size={12} color="#8e8e93" />
               <Text style={styles.statLabel}>followers</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.statItem} onPress={handleFollowingPress}>
-              <Text style={styles.statNumber}>{user.following?.length || '0'}</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.statItem} onPress={handleFollowingPress}>
+            <Text style={styles.statNumber}>{formatNumber(user.following?.length || 0)}</Text>
+            <View style={styles.statLabelContainer}>
+              <Icon name="person-add" size={12} color="#8e8e93" />
               <Text style={styles.statLabel}>following</Text>
-            </TouchableOpacity>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{userGames.length}</Text>
+            </View>
+          </TouchableOpacity>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{formatNumber(userGames.length)}</Text>
+            <View style={styles.statLabelContainer}>
+              <Icon name="game-controller" size={12} color="#8e8e93" />
               <Text style={styles.statLabel}>games</Text>
+            </View>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{formatNumber(totalLikes)}</Text>
+            <View style={styles.statLabelContainer}>
+              <Icon name="heart" size={12} color="#8e8e93" />
+              <Text style={styles.statLabel}>likes</Text>
             </View>
           </View>
         </View>
@@ -191,29 +236,35 @@ const ProfileScreen = ({ navigation, route }: MainTabScreenProps<'Profile'>) => 
       <View style={styles.actionButtons}>
         {isOwnProfile ? (
           <TouchableOpacity style={styles.createGameButton} onPress={handleCreateGame}>
-            <Icon name="add" size={16} color="#ffffff" />
-            <Text style={styles.createGameButtonText}>Create Game</Text>
+            <View style={styles.buttonContent}>
+              <Icon name="add-circle" size={20} color="#ffffff" />
+              <Text style={styles.createGameButtonText}>Create Game</Text>
+            </View>
           </TouchableOpacity>
         ) : (
-          <>
+          <View style={styles.socialButtons}>
             <TouchableOpacity 
               style={[styles.followButton, isFollowing && styles.followingButton]} 
               onPress={handleFollowToggle}
             >
-              <Icon 
-                name={isFollowing ? "checkmark" : "add"} 
-                size={16} 
-                color={isFollowing ? "#9d4edd" : "#ffffff"} 
-              />
-              <Text style={[styles.followButtonText, isFollowing && styles.followingButtonText]}>
-                {isFollowing ? 'Following' : 'Follow'}
-              </Text>
+              <View style={styles.buttonContent}>
+                <Icon 
+                  name={isFollowing ? "checkmark-circle" : "person-add"} 
+                  size={18} 
+                  color={isFollowing ? "#9d4edd" : "#ffffff"} 
+                />
+                <Text style={[styles.followButtonText, isFollowing && styles.followingButtonText]}>
+                  {isFollowing ? 'Following' : 'Follow'}
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.messageButton}>
-              <Icon name="chatbubble-outline" size={20} color="#9d4edd" />
-              <Text style={styles.messageButtonText}>Message</Text>
+              <View style={styles.buttonContent}>
+                <Icon name="chatbubble" size={18} color="#9d4edd" />
+                <Text style={styles.messageButtonText}>Message</Text>
+              </View>
             </TouchableOpacity>
-          </>
+          </View>
         )}
       </View>
     </>
@@ -265,7 +316,8 @@ const ProfileScreen = ({ navigation, route }: MainTabScreenProps<'Profile'>) => 
         numColumns={2}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={() => (
-          <>
+          <View style={{ paddingHorizontal: 15 }}>
+            {renderTopHeader()}
             {renderHeader()}
             
             {/* Games Toggle Section */}
@@ -297,7 +349,7 @@ const ProfileScreen = ({ navigation, route }: MainTabScreenProps<'Profile'>) => 
             
             {/* Show placeholder when loading */}
             {isLoading && renderPlaceholderGrid()}
-          </>
+          </View>
         )}
         ListEmptyComponent={!isLoading ? renderEmptyState : null}
         contentContainerStyle={[
@@ -316,6 +368,56 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0f0a1e',
   },
+  topHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 0,
+    marginBottom: 12,
+    paddingTop: 5,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingTop: 5,
+  },
+  headerWrapper: {
+    marginBottom: 16,
+    paddingHorizontal: 0,
+  },
+  headerLeft: {
+    flexDirection: 'column',
+    gap: 4,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  appName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  profileDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#c77dff',
+  },
+  profileText: {
+    fontSize: 12,
+    color: '#c77dff',
+    fontWeight: '600',
+  },
   gridRow: {
     justifyContent: 'space-evenly',
     paddingHorizontal: 0,
@@ -331,20 +433,24 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingTop: 8,
-    paddingBottom: 4,
+    paddingBottom: 16,
+    marginBottom: 12,
+  },
+  profileMainInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
   },
   avatarContainer: {
     position: 'relative',
     marginRight: 16,
   },
   avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     borderWidth: 3,
     borderColor: '#9d4edd',
   },
@@ -353,16 +459,17 @@ const styles = StyleSheet.create({
     bottom: -2,
     right: -2,
     backgroundColor: '#9d4edd',
-    borderRadius: 10,
-    width: 20,
-    height: 20,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#1a1a2e',
+    borderColor: '#0f0a1e',
   },
   userInfo: {
     flex: 1,
+    paddingTop: 4,
   },
   nameSection: {
     flexDirection: 'row',
@@ -370,28 +477,45 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 8,
   },
-  headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   editProfileButton: {
-    padding: 4,
-    marginRight: 8,
+    padding: 6,
+    backgroundColor: '#1c1c1e',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#3a3a3a',
   },
   settingsButton: {
-    padding: 4,
+    padding: 8,
   },
   displayName: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 8,
+  },
+  bio: {
+    fontSize: 14,
+    color: '#e0e0e0',
+    lineHeight: 20,
+    marginTop: 4,
   },
   statsContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 16,
+    backgroundColor: '#1c1c1e',
+    borderRadius: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#3a3a3a',
   },
   statItem: {
-    marginRight: 24,
+    alignItems: 'center',
+  },
+  statLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
   },
   statNumber: {
     fontSize: 16,
@@ -405,44 +529,44 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   actionButtons: {
+    paddingHorizontal: 10,
+    marginBottom: 16,
+  },
+  socialButtons: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 16,
+    gap: 12,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   createGameButton: {
-    flex: 1,
     backgroundColor: '#9d4edd',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 8,
-    shadowColor: '#9d4edd',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  createGameButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '700',
-    marginLeft: 8,
-  },
-  followButton: {
-    flex: 1,
-    backgroundColor: '#9d4edd',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 16,
+    borderRadius: 16,
     shadowColor: '#9d4edd',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
+  },
+  createGameButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  followButton: {
+    flex: 1,
+    backgroundColor: '#9d4edd',
+    paddingVertical: 14,
+    borderRadius: 16,
+    shadowColor: '#9d4edd',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   followingButton: {
     backgroundColor: 'transparent',

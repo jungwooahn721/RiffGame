@@ -10,6 +10,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+const DummyComponent = () => null;
+
 const MainTabNavigator = () => {
   const insets = useSafeAreaInsets();
   
@@ -80,6 +82,35 @@ const MainTabNavigator = () => {
           ),
           tabBarLabel: 'Explore',
         }}
+      />
+      <Tab.Screen 
+        name="Create"
+        component={DummyComponent} // This component will not be rendered
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#9d4edd',
+                width: 55,
+                height: 35,
+                borderRadius: 15,
+              }}
+            >
+              <Icon name="add-circle-outline" size={28} color="#fff" />
+            </View>
+          ),
+          tabBarLabel: () => null, // We don't want a label for this button
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            // Prevent default action
+            e.preventDefault();
+            // Navigate to the CreateGame screen as a modal
+            navigation.navigate('CreateGame');
+          },
+        })}
       />
       <Tab.Screen 
         name="Profile" 

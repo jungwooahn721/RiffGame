@@ -39,7 +39,7 @@ export const users: User[] = [
     username: 'Jungwoo Ahn', 
     displayName: 'Jungwoo Ahn',
     avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d', 
-    bio: '🎮 Game developer & AI enthusiast\n🚀 Creating the future of gaming',
+    bio: '🎮 Game developer & AI enthusiast',
     verified: true,
     followers: ['Bob Builder', 'Charlie Pixel'],
     following: ['Bob Builder'],

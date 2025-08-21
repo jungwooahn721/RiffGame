@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Text,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -69,29 +70,76 @@ const ExploreScreen = ({ navigation }: MainTabScreenProps<'Explore'>) => {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <Text style={styles.headerTitle}>Explore</Text>
+      <View style={styles.headerLeft}>
+        <View style={styles.logoContainer}>
+          <Icon name="compass" size={20} color="#9d4edd" />
+          <Text style={styles.appName}>RiffGame</Text>
+        </View>
+        <View style={styles.statusIndicator}>
+          <View style={styles.exploreDot} />
+          <Text style={styles.exploreText}>Discover Games</Text>
+        </View>
+      </View>
       <TouchableOpacity style={styles.searchButton}>
         <Icon name="search-outline" size={24} color="#ffffff" />
       </TouchableOpacity>
     </View>
   );
 
+  const renderCategories = () => (
+    <View style={styles.categoriesContainer}>
+      <Text style={styles.sectionTitle}>Browse by Category</Text>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoriesScrollContent}
+        style={styles.categoriesScroll}
+      >
+        {['Action', 'Puzzle', 'Arcade', 'Strategy', 'Adventure', 'Sports', 'Racing', 'Simulation'].map((category) => (
+          <TouchableOpacity key={category} style={styles.categoryCard}>
+            <Text style={styles.categoryText}>{category}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
+  const renderFeatured = () => (
+    <View style={styles.featuredContainer}>
+      <Text style={styles.sectionTitle}>Featured Games</Text>
+      <View style={styles.featuredGrid}>
+        {state.games.slice(0, 6).map((game) => (
+          <TouchableOpacity
+            key={game.id}
+            style={styles.featuredItem}
+            onPress={() => handleGamePress(game.id)}
+          >
+            <View style={styles.gameContainer}>
+              <View style={styles.gradientOverlay} />
+              <Text style={styles.gameTitle}>{game.title}</Text>
+              <View style={styles.playIndicator}>
+                <Icon name="play" size={16} color="#fff" />
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
-      <FlatList
-        data={isLoading ? Array.from({ length: 12 }, (_, i) => ({ id: `placeholder-${i}` })) : state.games}
-        renderItem={isLoading ? renderPlaceholder : renderGameItem}
-        numColumns={3}
-        keyExtractor={(item, index) => isLoading ? `placeholder-${index}` : item.id}
-        ListHeaderComponent={renderHeader}
+      <ScrollView
         contentContainerStyle={[
           styles.content,
           { paddingBottom: 50 + insets.bottom }
         ]}
-        columnWrapperStyle={styles.row}
         showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
+      >
+        {renderHeader()}
+        {renderCategories()}
+        {renderFeatured()}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -102,15 +150,46 @@ const styles = StyleSheet.create({
     backgroundColor: '#0f0a1e',
   },
   content: {
-    paddingHorizontal: 2,
+    paddingHorizontal: 15,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 16,
-    marginBottom: 8,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    marginBottom: 12,
+    paddingTop: 5,
+  },
+  headerLeft: {
+    flexDirection: 'column',
+    gap: 4,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  appName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  exploreDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#ff6b35',
+  },
+  exploreText: {
+    fontSize: 12,
+    color: '#ff6b35',
+    fontWeight: '600',
   },
   headerTitle: {
     fontSize: 28,
@@ -119,6 +198,57 @@ const styles = StyleSheet.create({
   },
   searchButton: {
     padding: 8,
+  },
+  categoriesContainer: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 12,
+  },
+  categoriesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  categoriesScroll: {
+    flexGrow: 0,
+  },
+  categoriesScrollContent: {
+    paddingHorizontal: 15,
+    gap: 12,
+  },
+  categoryCard: {
+    backgroundColor: '#1c1c1e',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: '#3a3a3a',
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  categoryText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  featuredContainer: {
+    marginBottom: 24,
+  },
+  featuredGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  featuredItem: {
+    width: (Dimensions.get('window').width - 46) / 3, // 3 columns with gaps
+    height: (Dimensions.get('window').width - 46) / 3,
+    backgroundColor: '#1a1a2e',
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   row: {
     justifyContent: 'space-between',

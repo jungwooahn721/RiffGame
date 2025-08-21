@@ -103,7 +103,16 @@ const FeedScreen = ({ navigation }: MainTabScreenProps<'Feed'>) => {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTop}>
-        <Text style={styles.headerTitle}>Discover</Text>
+        <View style={styles.headerLeft}>
+          <View style={styles.logoContainer}>
+            <Icon name="game-controller" size={20} color="#9d4edd" />
+            <Text style={styles.appName}>RiffGame</Text>
+          </View>
+          <View style={styles.statusIndicator}>
+            <View style={styles.liveDot} />
+            <Text style={styles.liveText}>Live Feed</Text>
+          </View>
+        </View>
         <TouchableOpacity onPress={toggleSearch} style={styles.searchToggle}>
           <Icon name="search-outline" size={24} color="#ffffff" />
         </TouchableOpacity>
@@ -204,14 +213,45 @@ const styles = StyleSheet.create({
     // paddingBottom moved to inline style for dynamic calculation
   },
   header: {
-    marginBottom: 16, // Reduced from 20
+    marginBottom: 16,
+    paddingHorizontal: 0,
   },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12, // Reduced from 15
-    paddingTop: 5, // Added small top padding
+    marginBottom: 12,
+    paddingTop: 5,
+  },
+  headerLeft: {
+    flexDirection: 'column',
+    gap: 4,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  appName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#00ff88',
+  },
+  liveText: {
+    fontSize: 12,
+    color: '#00ff88',
+    fontWeight: '600',
   },
   headerTitle: {
     fontSize: 28,

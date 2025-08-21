@@ -16,6 +16,7 @@ export type RootStackParamList = {
 export type MainTabParamList = {
   Feed: undefined;
   Explore: undefined;
+  Create: undefined;
   Profile: { userId?: string };
 };
 

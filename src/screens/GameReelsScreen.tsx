@@ -129,7 +129,7 @@ const GameReelItem: React.FC<GameReelItemProps> = ({
       />
 
       {/* Overlay UI */}
-      <View style={styles.overlay}>
+      <View style={[styles.overlay, { bottom: insets.bottom > 0 ? insets.bottom : 20 }]}>
         {/* User Info */}
         <TouchableOpacity 
           style={styles.userInfo}
@@ -172,7 +172,7 @@ const GameReelItem: React.FC<GameReelItemProps> = ({
       </View>
 
       {/* Action Buttons */}
-      <View style={styles.actionButtons}>
+      <View style={[styles.actionButtons, { bottom: insets.bottom > 0 ? insets.bottom + 10 : 30 }]}>
         <Animated.View style={{ transform: [{ scale: likeAnimation }] }}>
           <TouchableOpacity 
             style={[styles.actionButton, isLiked && styles.likedButton]}
@@ -389,7 +389,6 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: 'absolute',
-    bottom: 20,
     left: 20,
     right: 80,
     paddingBottom: 10,
@@ -463,7 +462,6 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     position: 'absolute',
-    bottom: 30,
     right: 20,
     alignItems: 'center',
   },

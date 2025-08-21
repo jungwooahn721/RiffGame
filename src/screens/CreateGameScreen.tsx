@@ -2,34 +2,51 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
-  Alert,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
-  SafeAreaView,
+  ActivityIndicator,
+  StatusBar,
+  Alert,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { games, aiGeneratedGameHtml } from '../core/mockData';
 import { RootStackScreenProps } from '../navigation/types';
+import { games, aiGeneratedGameHtml } from '../core/mockData';
+import { useApp } from '../core/AppContext';
+import { Game } from '../types/entities';
 
-const systemPrompt = `You are an expert game developer...`; // Full prompt remains the same
-
-type OptionButtonProps = {
-  text: string;
-  isSelected: boolean;
-  onPress: () => void;
+type SegmentedControlProps = {
+  options: string[];
+  selectedValue: string;
+  onSelect: (value: string) => void;
 };
 
-const OptionButton = ({ text, isSelected, onPress }: OptionButtonProps) => (
-  <TouchableOpacity
-    style={[styles.option, isSelected ? styles.optionSelected : {}]}
-    onPress={onPress}>
-    <Text style={styles.optionText}>{text}</Text>
-  </TouchableOpacity>
+const SegmentedControl: React.FC<SegmentedControlProps> = ({ options, selectedValue, onSelect }) => (
+  <View style={styles.segmentedControl}>
+    {options.map(option => (
+      <TouchableOpacity
+        key={option}
+        onPress={() => onSelect(option)}
+        style={[
+          styles.segmentButton,
+          selectedValue === option && styles.segmentButtonActive,
+        ]}
+      >
+        <Text style={[
+          styles.segmentButtonText,
+          selectedValue === option && styles.segmentButtonTextActive,
+        ]}>
+          {option}
+        </Text>
+      </TouchableOpacity>
+    ))}
+  </View>
 );
 
 const CreateGameScreen = ({ navigation }: RootStackScreenProps<'CreateGame'>) => {
@@ -39,171 +56,234 @@ const CreateGameScreen = ({ navigation }: RootStackScreenProps<'CreateGame'>) =>
   const [perspective, setPerspective] = useState<'Top-Down' | 'Side-View'>('Top-Down');
   const [gameMode, setGameMode] = useState<'Arcade' | 'Sandbox'>('Arcade');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { actions } = useApp();
 
   const handleImageSelection = () => {
     launchImageLibrary({ mediaType: 'photo', quality: 0.5 }, (response) => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorCode) {
-        Alert.alert('ImagePicker Error', response.errorMessage);
+        Alert.alert('ImagePicker Error', response.errorMessage ?? 'Unknown error');
       } else if (response.assets && response.assets[0].uri) {
         setSelectedImage(response.assets[0].uri);
-        // In a real app, you would convert this image to base64 to send to the API
         console.log('Selected image URI:', response.assets[0].uri);
       }
     });
   };
 
-  const handleGenerateGame = async () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) {
       Alert.alert('Prompt is empty', 'Please describe the game you want to create.');
       return;
     }
     setIsLoading(true);
 
-    const detailedPrompt = `Create a ${dimension}, ${perspective}, ${gameMode} game. The user's description is: "${prompt}"`;
+    let detailedPrompt = `Create a ${dimension}, ${perspective}, ${gameMode} game. The user's description is: "${prompt}"`;
+    if (selectedImage) {
+      detailedPrompt += ` Use the attached image as visual inspiration.`;
+    }
 
     console.log('--- Sending to AI ---');
-    console.log('System Prompt:', systemPrompt);
-    console.log('User Prompt:', detailedPrompt);
+    console.log('Detailed Prompt:', detailedPrompt);
     console.log('---------------------');
+    
+    // Simulate API call to GPT-5
+    await new Promise<void>(resolve => setTimeout(resolve, 3000));
 
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    const newGame = {
+    const newGame: Game = {
       id: `game-${Date.now()}`,
-      title: prompt.substring(0, 30).trim() + '...',
+      title: prompt.length > 30 ? prompt.substring(0, 27) + '...' : prompt,
+      description: `A new game generated from the prompt: "${prompt}"`,
+      category: 'Arcade',
+      tags: [dimension, perspective, gameMode],
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      views: 0,
       creator: {
         id: 'user-1',
         username: 'You',
         avatarUrl: 'https://i.pravatar.cc/150?u=user-1',
+        verified: true,
         followers: [],
         following: [],
+        createdAt: new Date(),
+        stats: {
+          totalGames: 1,
+          totalLikes: 0,
+          totalViews: 0,
+        },
       },
-      thumbnailUrl: `https://picsum.photos/seed/${Date.now()}/400/600`,
+      thumbnailUrl: selectedImage || `https://picsum.photos/seed/${Date.now()}/400/600`,
       gameHtml: aiGeneratedGameHtml,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isPublic: true,
+      likedBy: [],
     };
 
-    games.unshift(newGame);
+    // Add the new game to the global state
+    actions.addGame(newGame);
+    
     setIsLoading(false);
 
+    // Navigate to the reels screen to view the new game
     navigation.navigate('GameReels', {
-      games: [newGame],
+      games: [newGame, ...games],
       initialGameId: newGame.id,
     });
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['bottom']}>
+      <StatusBar barStyle="light-content" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.flex}
+      >
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-back-outline" size={28} color="#fff" />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
+            <Icon name="close" size={28} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Create Game</Text>
-          <View style={{ width: 28 }} />
+          <Text style={styles.headerTitle}>Create with AI</Text>
         </View>
-
-        <View style={styles.promptContainer}>
-          <TextInput
-            style={styles.promptInput}
-            placeholder="Describe your game..."
-            placeholderTextColor="#8e8e93"
-            value={prompt}
-            onChangeText={setPrompt}
-            multiline
-          />
-          <View style={styles.promptIcons}>
-            <TouchableOpacity onPress={handleImageSelection}>
-              <Icon name="image-outline" size={24} color="#8e8e93" />
-            </TouchableOpacity>
-            <Icon name="help-circle-outline" size={24} color="#8e8e93" />
-          </View>
-        </View>
-
-        {selectedImage && (
-          <View style={styles.imagePreviewContainer}>
-            <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
-            <TouchableOpacity style={styles.removeImageButton} onPress={() => setSelectedImage(null)}>
-              <Icon name="close-circle" size={24} color="#fff" />
+        
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.promptContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., 'A retro snake game with a modern twist'"
+              placeholderTextColor="#8a8a8a"
+              value={prompt}
+              onChangeText={setPrompt}
+              multiline
+            />
+            <TouchableOpacity onPress={handleImageSelection} style={styles.imagePickerButton}>
+              <Icon name="image-outline" size={24} color="#a0a0a0" />
             </TouchableOpacity>
           </View>
-        )}
 
-        <View style={styles.optionsSection}>
-          <Text style={styles.optionsTitle}>Options</Text>
-          <View style={styles.optionRow}>
-            <Text style={styles.optionLabel}>Dimension</Text>
-            <View style={styles.optionGroup}>
-              <OptionButton text="2D" isSelected={dimension === '2D'} onPress={() => setDimension('2D')} />
-              <OptionButton text="3D" isSelected={dimension === '3D'} onPress={() => setDimension('3D')} />
+          {selectedImage && (
+            <View style={styles.imagePreviewContainer}>
+              <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
+              <TouchableOpacity style={styles.removeImageButton} onPress={() => setSelectedImage(null)}>
+                <Icon name="close-circle" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <View style={styles.optionsContainer}>
+            <View style={styles.optionRow}>
+              <Text style={styles.optionLabel}>Dimension</Text>
+              <SegmentedControl 
+                options={['2D', '3D']}
+                selectedValue={dimension}
+                onSelect={setDimension as any}
+              />
+            </View>
+            <View style={styles.optionRow}>
+              <Text style={styles.optionLabel}>Perspective</Text>
+              <SegmentedControl 
+                options={['Top-Down', 'Side-View']}
+                selectedValue={perspective}
+                onSelect={setPerspective as any}
+              />
+            </View>
+            <View style={styles.optionRow}>
+              <Text style={styles.optionLabel}>Game Mode</Text>
+              <SegmentedControl 
+                options={['Arcade', 'Sandbox']}
+                selectedValue={gameMode}
+                onSelect={setGameMode as any}
+              />
             </View>
           </View>
-          <View style={styles.optionRow}>
-            <Text style={styles.optionLabel}>Perspective</Text>
-            <View style={styles.optionGroup}>
-              <OptionButton text="Top-Down" isSelected={perspective === 'Top-Down'} onPress={() => setPerspective('Top-Down')} />
-              <OptionButton text="Side-View" isSelected={perspective === 'Side-View'} onPress={() => setPerspective('Side-View')} />
-            </View>
+
+          <View style={styles.ideaBox}>
+            <Text style={styles.ideaTitle}>Need inspiration?</Text>
+            <Text style={styles.ideaText}>• A platformer in a candy world</Text>
+            <Text style={styles.ideaText}>• A space shooter against alien ships</Text>
+            <Text style={styles.ideaText}>• A simple puzzle game with colors</Text>
           </View>
-          <View style={styles.optionRow}>
-            <Text style={styles.optionLabel}>Game Mode</Text>
-            <View style={styles.optionGroup}>
-              <OptionButton text="Arcade" isSelected={gameMode === 'Arcade'} onPress={() => setGameMode('Arcade')} />
-              <OptionButton text="Sandbox" isSelected={gameMode === 'Sandbox'} onPress={() => setGameMode('Sandbox')} />
-            </View>
-          </View>
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <TouchableOpacity onPress={handleGenerate} disabled={isLoading || !prompt.trim()} style={[styles.generateButton, (!prompt.trim() || isLoading) && styles.disabledButton]}>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <>
+                <Icon name="game-controller" size={20} color="#fff" />
+                <Text style={styles.buttonText}>Generate Game</Text>
+              </>
+            )}
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.createButton} onPress={handleGenerateGame} disabled={isLoading}>
-          {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.createButtonText}>Create Game</Text>}
-        </TouchableOpacity>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: '#0f0a1e',
   },
-  container: {
+  flex: {
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     alignItems: 'center',
-    padding: 15,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    left: 15,
+    top: 10,
   },
   headerTitle: {
-    color: '#fff',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  scrollContent: {
+    padding: 20,
   },
   promptContainer: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1c1c1e',
     borderRadius: 15,
-    marginHorizontal: 15,
-    padding: 15,
-    minHeight: 200,
+    paddingHorizontal: 15,
+    paddingTop: 15,
+    paddingBottom: 10,
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: '#3a3a3a',
+    marginBottom: 20,
   },
-  promptInput: {
+  input: {
     flex: 1,
-    color: '#fff',
+    color: '#ffffff',
     fontSize: 16,
+    lineHeight: 24,
     textAlignVertical: 'top',
   },
-  promptIcons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+  imagePickerButton: {
+    position: 'absolute',
+    right: 10,
+    bottom: 10,
+    backgroundColor: '#333',
+    borderRadius: 15,
+    padding: 5,
   },
   imagePreviewContainer: {
-    marginHorizontal: 15,
-    marginTop: 15,
+    marginHorizontal: 0,
+    marginBottom: 20,
     position: 'relative',
   },
   imagePreview: {
@@ -217,62 +297,89 @@ const styles = StyleSheet.create({
     right: 10,
     backgroundColor: 'rgba(0,0,0,0.6)',
     borderRadius: 12,
+    padding: 2,
   },
-  optionsSection: {
-    backgroundColor: '#1a1a2e',
+  optionsContainer: {
+    backgroundColor: '#1c1c1e',
     borderRadius: 15,
-    margin: 15,
     padding: 20,
-  },
-  optionsTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#3a3a3a',
   },
   optionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   optionLabel: {
-    color: '#fff',
+    color: '#e0e0e0',
     fontSize: 16,
   },
-  optionGroup: {
+  segmentedControl: {
     flexDirection: 'row',
-    backgroundColor: '#0f0a1e',
-    borderRadius: 20,
-    padding: 4,
+    backgroundColor: '#101012',
+    borderRadius: 10,
+    padding: 2,
   },
-  option: {
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 16,
+  segmentButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 8,
   },
-  optionSelected: {
+  segmentButtonActive: {
     backgroundColor: '#9d4edd',
   },
-  optionText: {
-    color: '#fff',
+  segmentButtonText: {
+    color: '#a0a0a0',
     fontWeight: '600',
   },
+  segmentButtonTextActive: {
+    color: '#ffffff',
+  },
+  ideaBox: {
+    marginTop: 10,
+    backgroundColor: 'rgba(142, 45, 226, 0.1)',
+    borderRadius: 15,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(142, 45, 226, 0.3)',
+  },
+  ideaTitle: {
+    color: '#c77dff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  ideaText: {
+    color: '#e0e0e0',
+    fontSize: 14,
+    marginBottom: 5,
+    lineHeight: 20,
+  },
   footer: {
-    padding: 15,
+    padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#2a2a5a',
+    borderTopColor: '#2a2a2a',
   },
-  createButton: {
+  generateButton: {
     backgroundColor: '#9d4edd',
-    paddingVertical: 15,
-    borderRadius: 25,
+    width: '100%',
+    height: 50,
+    borderRadius: 15,
+    justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
   },
-  createButtonText: {
+  disabledButton: {
+    backgroundColor: '#5c5c5c',
+  },
+  buttonText: {
     color: '#ffffff',
     fontSize: 18,
     fontWeight: 'bold',
+    marginLeft: 10,
   },
 });
 
