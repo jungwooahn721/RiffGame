@@ -1,7 +1,9 @@
 import React from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
-import { StatusBar, SafeAreaView } from 'react-native';
+import { StatusBar } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
+import { AppProvider } from './src/core/AppContext';
 
 const customDarkTheme = {
   ...DarkTheme,
@@ -18,12 +20,16 @@ const customDarkTheme = {
 
 const App = () => {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0f0a1e' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#0f0a1e" />
-      <NavigationContainer theme={customDarkTheme}>
-        <AppNavigator />
-      </NavigationContainer>
-    </SafeAreaView>
+    <AppProvider>
+      <SafeAreaProvider>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#0f0a1e' }}>
+          <StatusBar barStyle="light-content" backgroundColor="#0f0a1e" />
+          <NavigationContainer theme={customDarkTheme}>
+            <AppNavigator />
+          </NavigationContainer>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </AppProvider>
   );
 };
 

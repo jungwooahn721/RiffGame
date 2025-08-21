@@ -1,18 +1,235 @@
-import { User, Game } from '../types/entities';
+import { User, Game, GameTemplate, Comment } from '../types/entities';
+
+export const gameTemplates: GameTemplate[] = [
+  {
+    id: 't1',
+    name: 'Arcade Platformer',
+    description: 'Classic side-scrolling platformer with jumping mechanics',
+    dimension: '2D',
+    perspective: 'Side-View',
+    gameMode: 'Arcade',
+    difficulty: 'Medium',
+    estimatedPlayTime: '3-5 minutes'
+  },
+  {
+    id: 't2',
+    name: 'Top-Down Shooter',
+    description: 'Fast-paced action game with enemies and power-ups',
+    dimension: '2D',
+    perspective: 'Top-Down',
+    gameMode: 'Action',
+    difficulty: 'Hard',
+    estimatedPlayTime: '2-4 minutes'
+  },
+  {
+    id: 't3',
+    name: 'Puzzle Maze',
+    description: 'Navigate through challenging mazes with obstacles',
+    dimension: '2D',
+    perspective: 'Top-Down',
+    gameMode: 'Puzzle',
+    difficulty: 'Easy',
+    estimatedPlayTime: '5-10 minutes'
+  }
+];
 
 export const users: User[] = [
-  { id: 'u1', username: 'Jungwoo Ahn', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d', templates: [] },
-  { id: 'u2', username: 'Bob', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704e', templates: [] },
-  { id: 'u3', username: 'Charlie', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704f', templates: [] },
+  { 
+    id: 'Jungwoo Ahn', 
+    username: 'Jungwoo Ahn', 
+    displayName: 'Jungwoo Ahn',
+    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d', 
+    bio: '🎮 Game developer & AI enthusiast\n🚀 Creating the future of gaming',
+    verified: true,
+    followers: ['Bob Builder', 'Charlie Pixel'],
+    following: ['Bob Builder'],
+    templates: [gameTemplates[0], gameTemplates[1]],
+    createdAt: new Date('2024-01-15'),
+    stats: {
+      totalGames: 12,
+      totalLikes: 1543,
+      totalViews: 8921
+    }
+  },
+  { 
+    id: 'Bob Builder', 
+    username: 'Bob Builder', 
+    displayName: 'Bob Builder',
+    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704e', 
+    bio: 'Indie game creator 🎯\nLove puzzle and strategy games',
+    verified: false,
+    followers: ['Jungwoo Ahn', 'Charlie Pixel'],
+    following: ['Jungwoo Ahn', 'Charlie Pixel'],
+    templates: [gameTemplates[2]],
+    createdAt: new Date('2024-02-10'),
+    stats: {
+      totalGames: 8,
+      totalLikes: 892,
+      totalViews: 4521
+    }
+  },
+  { 
+    id: 'Charlie Pixel', 
+    username: 'Charlie Pixel', 
+    displayName: 'Charlie Pixel',
+    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704f', 
+    bio: 'Retro game enthusiast 👾\nPixel art & 8-bit music lover',
+    verified: false,
+    followers: ['Bob Builder'],
+    following: ['Jungwoo Ahn', 'Bob Builder'],
+    templates: [],
+    createdAt: new Date('2024-03-05'),
+    stats: {
+      totalGames: 5,
+      totalLikes: 367,
+      totalViews: 2103
+    }
+  },
 ];
 
 export const games: Game[] = [
-  { id: 'g1', title: 'Flappy Clone', creator: users[0], likes: 120, comments: 12, shares: 4 },
-  { id: 'g2', title: 'Maze Runner', creator: users[1], likes: 256, comments: 34, shares: 10 },
-  { id: 'g3', title: 'Pong 3D', creator: users[2], likes: 50, comments: 5, shares: 2 },
-  { id: 'g4', title: 'Platform Jumper', creator: users[0], likes: 88, comments: 8, shares: 6 },
-  { id: 'g5', title: 'Space Shooter', creator: users[1], likes: 432, comments: 55, shares: 23 },
-  { id: 'g6', title: 'Avoid the Blocks', creator: users[2], likes: 300, comments: 40, shares: 15, gameUrl: 'https://example.com/game/10' }
+  { 
+    id: 'g1', 
+    title: 'Neon Flappy Adventure', 
+    description: 'Navigate through neon obstacles in this addictive flappy-style game with power-ups!',
+    creator: users[0], 
+    thumbnailUrl: 'https://picsum.photos/seed/g1/400/600',
+    likes: 120, 
+    comments: 12, 
+    shares: 4,
+    views: 1205,
+    tags: ['flappy', 'neon', 'arcade', 'obstacles'],
+    category: 'Arcade',
+    createdAt: new Date('2024-08-20'),
+    updatedAt: new Date('2024-08-20'),
+    isPublic: true,
+    likedBy: ['Bob Builder', 'Charlie Pixel'],
+    template: gameTemplates[0]
+  },
+  { 
+    id: 'g2', 
+    title: 'Quantum Maze Runner', 
+    description: 'Solve quantum puzzles while racing through an ever-changing maze!',
+    creator: users[1], 
+    thumbnailUrl: 'https://picsum.photos/seed/g2/400/600',
+    likes: 256, 
+    comments: 34, 
+    shares: 10,
+    views: 2890,
+    tags: ['maze', 'puzzle', 'quantum', 'runner'],
+    category: 'Puzzle',
+    createdAt: new Date('2024-08-19'),
+    updatedAt: new Date('2024-08-19'),
+    isPublic: true,
+    likedBy: ['Jungwoo Ahn', 'Charlie Pixel'],
+    template: gameTemplates[2]
+  },
+  { 
+    id: 'g3', 
+    title: 'Cosmic Pong 3D', 
+    description: 'Classic pong reimagined in a 3D cosmic environment with special effects!',
+    creator: users[2], 
+    thumbnailUrl: 'https://picsum.photos/seed/g3/400/600',
+    likes: 50, 
+    comments: 5, 
+    shares: 2,
+    views: 423,
+    tags: ['pong', '3d', 'cosmic', 'retro'],
+    category: 'Arcade',
+    createdAt: new Date('2024-08-18'),
+    updatedAt: new Date('2024-08-18'),
+    isPublic: true,
+    likedBy: ['Jungwoo Ahn'],
+    template: gameTemplates[1]
+  },
+  { 
+    id: 'g4', 
+    title: 'Pixel Platform Jumper', 
+    description: 'Jump through pixel-perfect platforms in this challenging retro platformer!',
+    creator: users[0], 
+    thumbnailUrl: 'https://picsum.photos/seed/g4/400/600',
+    likes: 88, 
+    comments: 8, 
+    shares: 6,
+    views: 987,
+    tags: ['platform', 'pixel', 'jumping', 'retro'],
+    category: 'Action',
+    createdAt: new Date('2024-08-17'),
+    updatedAt: new Date('2024-08-17'),
+    isPublic: true,
+    likedBy: ['Bob Builder'],
+    template: gameTemplates[0]
+  },
+  { 
+    id: 'g5', 
+    title: 'Galaxy Defense Force', 
+    description: 'Defend Earth from alien invasion in this intense space shooter!',
+    creator: users[1], 
+    thumbnailUrl: 'https://picsum.photos/seed/g5/400/600',
+    likes: 432, 
+    comments: 55, 
+    shares: 23,
+    views: 4321,
+    tags: ['space', 'shooter', 'aliens', 'defense'],
+    category: 'Action',
+    createdAt: new Date('2024-08-16'),
+    updatedAt: new Date('2024-08-16'),
+    isPublic: true,
+    likedBy: ['Jungwoo Ahn', 'Charlie Pixel'],
+    template: gameTemplates[1]
+  },
+  { 
+    id: 'g6', 
+    title: 'Block Dodge Master', 
+    description: 'Test your reflexes in this fast-paced block dodging challenge!',
+    creator: users[2], 
+    thumbnailUrl: 'https://picsum.photos/seed/g6/400/600',
+    likes: 300, 
+    comments: 40, 
+    shares: 15,
+    views: 3456,
+    tags: ['dodge', 'blocks', 'reflexes', 'challenge'],
+    category: 'Arcade',
+    createdAt: new Date('2024-08-15'),
+    updatedAt: new Date('2024-08-15'),
+    isPublic: true,
+    likedBy: ['Jungwoo Ahn', 'Bob Builder'],
+    gameUrl: 'https://example.com/game/10',
+    template: gameTemplates[0]
+  }
+];
+
+export const comments: Comment[] = [
+  {
+    id: 'c1',
+    gameId: 'g1',
+    userId: 'Bob Builder',
+    user: users[1],
+    content: 'This is amazing! Love the neon aesthetic 🔥',
+    createdAt: new Date('2024-08-20T10:30:00Z'),
+    likes: 5,
+    likedBy: ['Jungwoo Ahn', 'Charlie Pixel']
+  },
+  {
+    id: 'c2',
+    gameId: 'g1',
+    userId: 'Charlie Pixel',
+    user: users[2],
+    content: 'So addictive! Can\'t stop playing 😍',
+    createdAt: new Date('2024-08-20T11:15:00Z'),
+    likes: 3,
+    likedBy: ['Jungwoo Ahn']
+  },
+  {
+    id: 'c3',
+    gameId: 'g2',
+    userId: 'Jungwoo Ahn',
+    user: users[0],
+    content: 'Genius concept! The quantum mechanics are mind-bending 🧠',
+    createdAt: new Date('2024-08-19T14:20:00Z'),
+    likes: 8,
+    likedBy: ['Bob Builder', 'Charlie Pixel']
+  }
 ];
 
 export const aiGeneratedGameHtml = `

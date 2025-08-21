@@ -5,6 +5,8 @@ import GameScreen from '../screens/GameScreen';
 import UserListScreen from '../screens/UserListScreen';
 import CreateGameScreen from '../screens/CreateGameScreen';
 import GameReelsScreen from '../screens/GameReelsScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,6 +37,16 @@ const AppNavigator = () => {
       <Stack.Screen
         name="GameReels"
         component={GameReelsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

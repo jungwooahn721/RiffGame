@@ -9,10 +9,13 @@ export type RootStackParamList = {
   UserList: { userId: string; type: 'followers' | 'following' };
   CreateGame: undefined;
   GameReels: { games: Game[]; initialGameId: string };
+  EditProfile: { user: any };
+  Settings: undefined;
 };
 
 export type MainTabParamList = {
   Feed: undefined;
+  Explore: undefined;
   Profile: { userId?: string };
 };
 

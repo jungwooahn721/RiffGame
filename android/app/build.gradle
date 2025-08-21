@@ -77,7 +77,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "org.reactjs.native.example.RiffGame"
+    namespace "org.reactjs.rn.example.RiffGame"
     defaultConfig {
         applicationId "org.reactjs.native.example.RiffGame"
         minSdkVersion rootProject.ext.minSdkVersion

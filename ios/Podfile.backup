@@ -1,0 +1,66 @@
+# Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
+
+platform :ios, min_ios_version_supported
+prepare_react_native_project!
+
+# Note: Avoid global `use_modular_headers!` as it can trigger
+# non-modular include and module redefinition errors with React Native/Hermes
+# on modern Xcode versions. Firebase via RNFB does not require this globally.
+# If a specific Pod needs modular headers, set it per-pod instead.
+
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
+
+target 'RiffGame' do
+  config = use_native_modules!
+
+  # Add this line
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+  # Make GoogleUtilities generate module maps so Swift pods (FirebaseCoreInternal)
+  # can import it when building as static libraries.
+  pod 'GoogleUtilities', :modular_headers => true
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # An absolute path to your application root.
+  :app_path => "#{Pod::Config.instance.installation_root}/..",
+  :new_arch_enabled => false,
+  :hermes_enabled => false
+  )
+
+  post_install do |installer|
+    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
+    )
+
+    # Be conservative about warnings across pods
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+  config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      end
+    end
+
+    # Avoid module name clashes like 'react_runtime' by preventing
+    # certain pods from defining modules in Xcode 16.
+    %w[React-RuntimeHermes React-RuntimeCore React-Core].each do |tname|
+      target = installer.pods_project.targets.find { |t| t.name == tname }
+      next unless target
+      target.build_configurations.each do |config|
+        config.build_settings['DEFINES_MODULE'] = 'NO'
+      end
+    end
+  end
+end

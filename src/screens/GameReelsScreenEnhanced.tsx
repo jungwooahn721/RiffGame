@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackScreenProps } from '../navigation/types';
 import { Game } from '../types/entities';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -40,7 +39,6 @@ const GameReelItem: React.FC<GameReelItemProps> = ({
   isLiked
 }) => {
   const [likeAnimation] = useState(new Animated.Value(1));
-  const insets = useSafeAreaInsets();
 
   const handleLike = () => {
     // Animate like button
@@ -155,9 +153,7 @@ const GameReelItem: React.FC<GameReelItemProps> = ({
         {/* Game Description */}
         {game.description && (
           <View style={styles.descriptionContainer}>
-            <Text style={styles.description} numberOfLines={3}>
-              {game.description}
-            </Text>
+            <Text style={styles.description}>{game.description}</Text>
           </View>
         )}
 
@@ -199,6 +195,10 @@ const GameReelItem: React.FC<GameReelItemProps> = ({
           <Icon name="share-social-outline" size={32} color="#ffffff" />
           <Text style={styles.actionText}>{formatNumber(game.shares)}</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton}>
+          <Icon name="bookmark-outline" size={32} color="#ffffff" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -209,7 +209,6 @@ const GameReelsScreen = ({ route, navigation }: RootStackScreenProps<'GameReels'
   const { state, actions } = useApp();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
-  const insets = useSafeAreaInsets();
 
   const initialIndex = games.findIndex(game => game.id === initialGameId);
 
@@ -231,38 +230,6 @@ const GameReelsScreen = ({ route, navigation }: RootStackScreenProps<'GameReels'
       }
     }
   }, [games, actions]);
-
-  const handleMomentumScrollEnd = useCallback((event: any) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / height);
-    setCurrentIndex(index);
-  }, []);
-
-  const handleScrollEndDrag = useCallback((event: any) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const velocity = event.nativeEvent.velocity.y;
-    
-    // Calculate which page should be shown based on scroll position and velocity
-    let targetIndex = Math.round(offsetY / height);
-    
-    // If the user is scrolling fast, respect the direction
-    if (Math.abs(velocity) > 0.5) {
-      if (velocity > 0 && targetIndex < games.length - 1) {
-        targetIndex = Math.ceil(offsetY / height);
-      } else if (velocity < 0 && targetIndex > 0) {
-        targetIndex = Math.floor(offsetY / height);
-      }
-    }
-    
-    // Ensure we don't go out of bounds
-    targetIndex = Math.max(0, Math.min(targetIndex, games.length - 1));
-    
-    // Smooth scroll to target
-    flatListRef.current?.scrollToIndex({
-      index: targetIndex,
-      animated: true,
-    });
-  }, [games.length]);
 
   const handleUserPress = (userId: string) => {
     navigation.navigate('Main', { 
@@ -318,8 +285,7 @@ const GameReelsScreen = ({ route, navigation }: RootStackScreenProps<'GameReels'
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+    <SafeAreaView style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={games}
@@ -332,19 +298,12 @@ const GameReelsScreen = ({ route, navigation }: RootStackScreenProps<'GameReels'
           { length: height, offset: height * index, index }
         )}
         onViewableItemsChanged={handleViewableItemsChanged}
-        onMomentumScrollEnd={handleMomentumScrollEnd}
-        onScrollEndDrag={handleScrollEndDrag}
         viewabilityConfig={{
           viewAreaCoveragePercentThreshold: 50,
         }}
         removeClippedSubviews={true}
         maxToRenderPerBatch={3}
         windowSize={5}
-        snapToInterval={height}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        bounces={false}
-        scrollEventThrottle={16}
       />
       
       {/* Close Button */}
@@ -376,7 +335,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    paddingTop: 0, // Remove any top padding
   },
   page: {
     width: width,
@@ -389,15 +347,14 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 120,
     left: 20,
     right: 80,
-    paddingBottom: 10,
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   avatarContainer: {
     width: 50,
@@ -435,18 +392,17 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   descriptionContainer: {
-    marginBottom: 8,
+    marginBottom: 12,
   },
   description: {
     color: '#ffffff',
     fontSize: 14,
-    lineHeight: 18,
+    lineHeight: 20,
     opacity: 0.9,
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 5,
   },
   tag: {
     backgroundColor: 'rgba(157, 78, 221, 0.3)',
@@ -463,13 +419,13 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     position: 'absolute',
-    bottom: 30,
     right: 20,
+    bottom: 120,
     alignItems: 'center',
   },
   actionButton: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
     padding: 8,
   },
   likedButton: {
@@ -490,19 +446,17 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 10,
+    top: 60,
     right: 20,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 20,
     padding: 8,
-    zIndex: 10,
   },
   progressContainer: {
     position: 'absolute',
-    top: 10,
+    top: 60,
     left: 20,
     flexDirection: 'row',
-    zIndex: 10,
   },
   progressDot: {
     width: 6,
