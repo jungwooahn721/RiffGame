@@ -1,13 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  Text,
-  ScrollView,
-} from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Dimensions, Image, ScrollView } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useApp } from '../core/AppContext';
@@ -45,6 +37,7 @@ const ExploreScreen = ({ navigation }: MainTabScreenProps<'Explore'>) => {
       onPress={() => handleGamePress(item.id)}
     >
       <View style={styles.gameContainer}>
+        <Image source={{ uri: item.thumbnailUrl }} style={styles.gameImage} />
         <View style={styles.gradientOverlay} />
         <Text style={styles.gameTitle}>{item.title}</Text>
         
@@ -65,7 +58,20 @@ const ExploreScreen = ({ navigation }: MainTabScreenProps<'Explore'>) => {
   );
 
   const renderPlaceholder = ({ index }: { index: number }) => (
-    <View style={[styles.placeholderItem, { width: itemSize, height: itemSize }]} />
+    <View style={[styles.placeholderItem, { width: itemSize, height: itemSize }]}>
+      <Image 
+        source={{ uri: `https://picsum.photos/seed/placeholder${index}/400/600` }} 
+        style={styles.placeholderImage} 
+      />
+      <View style={styles.placeholderOverlay}>
+        <View style={styles.placeholderText} />
+        <View style={styles.placeholderStats}>
+          <View style={styles.placeholderStat} />
+          <View style={styles.placeholderStat} />
+          <View style={styles.placeholderStat} />
+        </View>
+      </View>
+    </View>
   );
 
   const renderHeader = () => (
@@ -115,6 +121,7 @@ const ExploreScreen = ({ navigation }: MainTabScreenProps<'Explore'>) => {
             onPress={() => handleGamePress(game.id)}
           >
             <View style={styles.gameContainer}>
+              <Image source={{ uri: game.thumbnailUrl }} style={styles.gameImage} />
               <View style={styles.gradientOverlay} />
               <Text style={styles.gameTitle}>{game.title}</Text>
               <View style={styles.playIndicator}>
@@ -266,6 +273,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
   },
+  gameImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+  },
   gradientOverlay: {
     position: 'absolute',
     top: 0,
@@ -319,6 +335,36 @@ const styles = StyleSheet.create({
   placeholderItem: {
     backgroundColor: '#2a2a2a',
     borderRadius: 8,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  placeholderImage: {
+    width: '100%',
+    height: '70%',
+    borderRadius: 8,
+  },
+  placeholderOverlay: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    right: 8,
+  },
+  placeholderText: {
+    height: 12,
+    backgroundColor: '#4a4a4a',
+    borderRadius: 4,
+    marginBottom: 6,
+    width: '80%',
+  },
+  placeholderStats: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  placeholderStat: {
+    height: 8,
+    width: 20,
+    backgroundColor: '#4a4a4a',
+    borderRadius: 2,
   },
 });
 

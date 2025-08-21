@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Game } from '../types/entities';
 
@@ -12,6 +12,7 @@ const GameGridItem: React.FC<GameGridItemProps> = ({ game, onPress }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <View style={styles.gamePreview}>
+        <Image source={{ uri: game.thumbnailUrl }} style={styles.gameImage} />
         <View style={styles.gradientOverlay} />
         <Text style={styles.gameTitle}>{game.title}</Text>
       </View>
@@ -50,6 +51,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#9d4edd',
+  },
+  gameImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
   },
   gradientOverlay: {
     position: 'absolute',

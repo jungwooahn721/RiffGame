@@ -87,28 +87,23 @@ const MainTabNavigator = () => {
         name="Create"
         component={DummyComponent} // This component will not be rendered
         options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#9d4edd',
-                width: 55,
-                height: 35,
-                borderRadius: 15,
-              }}
-            >
-              <Icon name="add-circle-outline" size={28} color="#fff" />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={{ alignItems: 'center' }}>
+              <Icon 
+                name={focused ? "add-circle" : "add-circle-outline"} 
+                size={26} 
+                color="#9d4edd" 
+              />
             </View>
           ),
-          tabBarLabel: () => null, // We don't want a label for this button
+          tabBarLabel: 'Create',
         }}
         listeners={({ navigation }) => ({
           tabPress: e => {
             // Prevent default action
             e.preventDefault();
             // Navigate to the CreateGame screen as a modal
-            navigation.navigate('CreateGame');
+            (navigation as any).navigate('CreateGame');
           },
         })}
       />

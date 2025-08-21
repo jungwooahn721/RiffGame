@@ -125,7 +125,18 @@ const ProfileScreen = ({ navigation, route }: MainTabScreenProps<'Profile'>) => 
     <View style={styles.placeholderGrid}>
       {Array.from({ length: 6 }).map((_, index) => (
         <View key={index} style={styles.placeholderGridItem}>
-          <View style={styles.placeholderGridImage} />
+          <Image 
+            source={{ uri: `https://picsum.photos/seed/placeholder${index + 10}/400/600` }} 
+            style={styles.placeholderGridImage} 
+          />
+          <View style={styles.placeholderGridOverlay}>
+            <View style={styles.placeholderGridText} />
+            <View style={styles.placeholderGridStats}>
+              <View style={styles.placeholderGridStat} />
+              <View style={styles.placeholderGridStat} />
+              <View style={styles.placeholderGridStat} />
+            </View>
+          </View>
         </View>
       ))}
     </View>
@@ -717,12 +728,36 @@ const styles = StyleSheet.create({
     marginHorizontal: '1%',
     marginBottom: 8,
     borderRadius: 8,
+    position: 'relative',
+    overflow: 'hidden',
   },
   placeholderGridImage: {
     width: '100%',
-    height: '100%',
-    backgroundColor: '#3a3a3a',
+    height: '70%',
     borderRadius: 8,
+  },
+  placeholderGridOverlay: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    right: 8,
+  },
+  placeholderGridText: {
+    height: 10,
+    backgroundColor: '#5a5a5a',
+    borderRadius: 3,
+    marginBottom: 4,
+    width: '75%',
+  },
+  placeholderGridStats: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  placeholderGridStat: {
+    height: 6,
+    width: 16,
+    backgroundColor: '#5a5a5a',
+    borderRadius: 2,
   },
 });
 
